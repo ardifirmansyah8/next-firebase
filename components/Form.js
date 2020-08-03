@@ -38,6 +38,7 @@ export const DateField = ({
         setFieldValue(name, data.value);
       }}
       {...props}
+      datePickerOnly
       className="datefield"
       error={touch && error}
     />

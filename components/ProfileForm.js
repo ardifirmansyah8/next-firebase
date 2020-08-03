@@ -71,11 +71,12 @@ const ProfileForm = ({ handleSubmit, values }) => {
                     >
                       Work Experiences:
                       <Button
+                        type="button"
                         onClick={() =>
                           arrayHelpers.push({
                             title: "",
                             company: "",
-                            recent: "",
+                            recent: false,
                             startDate: "",
                             endDate: "",
                             description: ""
@@ -141,7 +142,7 @@ const ProfileForm = ({ handleSubmit, values }) => {
                             />
                           </Grid.Column>
                           <Grid.Column width={1}>
-                            {index !== 0 && (
+                            {values.experiences.length > 1 && (
                               <Icon
                                 name="trash alternate outline"
                                 size="large"
@@ -179,8 +180,8 @@ export default withFormik({
     if (profile.experiences) {
       experiences = [...profile.experiences];
       experiences.map(exp => {
-        exp.startDate = exp.startDate ? new Date(exp.startDate) : null;
-        exp.endDate = exp.endDate ? new Date(exp.endDate) : null;
+        exp.startDate = exp.startDate ? new Date(exp.startDate) : "";
+        exp.endDate = exp.endDate ? new Date(exp.endDate) : "";
       });
     }
 
@@ -194,9 +195,9 @@ export default withFormik({
             {
               title: "",
               company: "",
-              recent: "",
-              startDate: null,
-              endDate: null,
+              recent: false,
+              startDate: "",
+              endDate: "",
               description: ""
             }
           ]
@@ -225,8 +226,8 @@ export default withFormik({
   handleSubmit: (values, { props }) => {
     const experiences = [...values.experiences];
     experiences.map(exp => {
-      exp.startDate = format(exp.startDate, "yyyy-MM-dd");
-      exp.endDate = format(exp.endDate, "yyyy-MM-dd");
+      exp.startDate = exp.startDate ? format(exp.startDate, "yyyy-MM-dd") : "";
+      exp.endDate = exp.endDate ? format(exp.endDate, "yyyy-MM-dd") : "";
     });
     props.onSave({ ...values, experiences });
   }
