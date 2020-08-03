@@ -9,7 +9,7 @@ import {
 } from "semantic-ui-react";
 import { withFormik, Field, FieldArray } from "formik";
 import * as Yup from "yup";
-import format from "date-fns/format";
+import fromUnixTime from "date-fns/fromUnixTime";
 
 import {
   InputField,
@@ -18,7 +18,7 @@ import {
   TextAreaField
 } from "../components/Form";
 
-const ProfileForm = ({ handleSubmit, values }) => {
+const ProfileForm = ({ handleSubmit, values, isLoading }) => {
   return (
     <Container style={{ margin: "100px 0" }}>
       <Form onSubmit={() => handleSubmit()}>
@@ -71,6 +71,7 @@ const ProfileForm = ({ handleSubmit, values }) => {
                     >
                       Work Experiences:
                       <Button
+                        primary
                         type="button"
                         onClick={() =>
                           arrayHelpers.push({
@@ -87,73 +88,75 @@ const ProfileForm = ({ handleSubmit, values }) => {
                       </Button>
                     </Header>
 
-                    {values.experiences.map((experience, index) => (
-                      <Grid key={index} style={{ marginTop: 10 }}>
-                        <Grid.Row>
-                          <Grid.Column width={2}>
-                            <Image
-                              src="https://react.semantic-ui.com/images/wireframe/image.png"
-                              size="tiny"
-                              rounded
-                            />
-                          </Grid.Column>
-                          <Grid.Column width={13}>
-                            <Field
-                              label="Title"
-                              placeholder="Title"
-                              type="text"
-                              name={`experiences.${index}.title`}
-                              component={InputField}
-                            />
-
-                            <Field
-                              label="Company Name"
-                              placeholder="Company Name"
-                              type="text"
-                              name={`experiences.${index}.company`}
-                              component={InputField}
-                            />
-
-                            <Field
-                              label="I am currently working in this role"
-                              name={`experiences.${index}.recent`}
-                              component={CheckboxField}
-                            />
-
-                            <Form.Group widths="equal">
+                    {values.experiences.map((experience, index) => {
+                      return (
+                        <Grid key={index} style={{ marginTop: 10 }}>
+                          <Grid.Row>
+                            <Grid.Column width={2}>
+                              <Image
+                                src="https://react.semantic-ui.com/images/wireframe/image.png"
+                                size="tiny"
+                                rounded
+                              />
+                            </Grid.Column>
+                            <Grid.Column width={13}>
                               <Field
-                                label="Start Date"
-                                name={`experiences.${index}.startDate`}
-                                component={DateField}
+                                label="Title"
+                                placeholder="Title"
+                                type="text"
+                                name={`experiences.${index}.title`}
+                                component={InputField}
                               />
 
                               <Field
-                                label="End Date"
-                                disabled={experience.recent}
-                                name={`experiences.${index}.endDate`}
-                                component={DateField}
+                                label="Company Name"
+                                placeholder="Company Name"
+                                type="text"
+                                name={`experiences.${index}.company`}
+                                component={InputField}
                               />
-                            </Form.Group>
 
-                            <Field
-                              label="Job Description"
-                              name={`experiences.${index}.description`}
-                              component={TextAreaField}
-                            />
-                          </Grid.Column>
-                          <Grid.Column width={1}>
-                            {values.experiences.length > 1 && (
-                              <Icon
-                                name="trash alternate outline"
-                                size="large"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => arrayHelpers.remove(index)}
+                              <Field
+                                label="I am currently working in this role"
+                                name={`experiences.${index}.recent`}
+                                component={CheckboxField}
                               />
-                            )}
-                          </Grid.Column>
-                        </Grid.Row>
-                      </Grid>
-                    ))}
+
+                              <Form.Group widths="equal">
+                                <Field
+                                  label="Start Date"
+                                  name={`experiences.${index}.startDate`}
+                                  component={DateField}
+                                />
+
+                                <Field
+                                  label="End Date"
+                                  disabled={experience.recent}
+                                  name={`experiences.${index}.endDate`}
+                                  component={DateField}
+                                />
+                              </Form.Group>
+
+                              <Field
+                                label="Job Description"
+                                name={`experiences.${index}.description`}
+                                component={TextAreaField}
+                              />
+                            </Grid.Column>
+                            <Grid.Column width={1}>
+                              {values.experiences.length > 1 && (
+                                <Icon
+                                  name="trash alternate outline"
+                                  size="large"
+                                  style={{ cursor: "pointer" }}
+                                  onClick={() => arrayHelpers.remove(index)}
+                                />
+                              )}
+                            </Grid.Column>
+                          </Grid.Row>
+                        </Grid>
+                      );
+                    })}
                   </>
                 )}
               />
@@ -161,6 +164,8 @@ const ProfileForm = ({ handleSubmit, values }) => {
                 <Button
                   type="submit"
                   color="orange"
+                  loading={isLoading}
+                  disabled={isLoading}
                   style={{ marginTop: 50, width: "25%" }}
                 >
                   Save
@@ -180,8 +185,10 @@ export default withFormik({
     if (profile.experiences) {
       experiences = [...profile.experiences];
       experiences.map(exp => {
-        exp.startDate = exp.startDate ? new Date(exp.startDate) : "";
-        exp.endDate = exp.endDate ? new Date(exp.endDate) : "";
+        exp.startDate = exp.startDate
+          ? fromUnixTime(exp.startDate.seconds)
+          : "";
+        exp.endDate = exp.endDate ? fromUnixTime(exp.endDate.seconds) : "";
       });
     }
 
@@ -224,11 +231,6 @@ export default withFormik({
     )
   }),
   handleSubmit: (values, { props }) => {
-    const experiences = [...values.experiences];
-    experiences.map(exp => {
-      exp.startDate = exp.startDate ? format(exp.startDate, "yyyy-MM-dd") : "";
-      exp.endDate = exp.endDate ? format(exp.endDate, "yyyy-MM-dd") : "";
-    });
-    props.onSave({ ...values, experiences });
+    props.onSave(values);
   }
 })(ProfileForm);

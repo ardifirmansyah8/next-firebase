@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Header, Button } from "semantic-ui-react";
+import { useToasts } from "react-toast-notifications";
 
 import ProfileDetail from "../components/ProfileDetail";
 import ProfileForm from "../components/ProfileForm";
@@ -9,10 +10,12 @@ import withAuth from "../hocs/withAuth";
 
 const Profile = ({ user }) => {
   const router = useRouter();
+  const { addToast } = useToasts();
 
   const [isEdit, setIsEdit] = useState(false);
   const [type, setType] = useState("create");
-  const [profile, setProfile] = useState({ email: user.email });
+  const [profile, setProfile] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
 
   const profileRef = firestore.doc(`profile/${user.uid}`);
 
@@ -23,15 +26,21 @@ const Profile = ({ user }) => {
   }, [user.uid]);
 
   const generateProfile = () => {
-    profileRef.get().then(snapshot => {
-      if (!snapshot.exists) {
-        setIsEdit(true);
-        setType("create");
-      } else {
-        setType("edit");
-        setProfile(snapshot.data());
-      }
-    });
+    const spec = localStorage.getItem("profileSpec");
+    if (spec) {
+      handleSave(JSON.parse(spec));
+    } else {
+      profileRef.get().then(snapshot => {
+        if (!snapshot.exists) {
+          setProfile({ email: user.email });
+          setType("create");
+          setIsEdit(true);
+        } else {
+          setType("edit");
+          setProfile(snapshot.data());
+        }
+      });
+    }
   };
 
   const handleLogout = () => {
@@ -50,25 +59,43 @@ const Profile = ({ user }) => {
   };
 
   const handleSave = values => {
+    setIsLoading(true);
+    localStorage.setItem("profileSpec", JSON.stringify(values));
+
     if (type === "create") {
       profileRef
         .set({ ...values })
-        .then(() => {
-          window.location.reload();
-        })
+        .then(() => onSaveSuccess())
         .catch(error => {
+          setIsLoading(false);
+          addToast("Error creating profile document", {
+            appearance: "error",
+            autoDismiss: true
+          });
           console.error("Error creating profile document", error);
         });
     } else {
       profileRef
         .update({ ...values })
-        .then(() => {
-          window.location.reload();
-        })
+        .then(() => onSaveSuccess())
         .catch(error => {
-          console.error("Error update profile document", error);
+          setIsLoading(false);
+          addToast("Error updating profile document", {
+            appearance: "error",
+            autoDismiss: true
+          });
+          console.error("Error updating profile document", error);
         });
     }
+  };
+
+  const onSaveSuccess = () => {
+    localStorage.removeItem("profileSpec");
+    addToast("Successfully saving profile", {
+      appearance: "success",
+      autoDismiss: true
+    });
+    setTimeout(() => window.location.reload(), 2500);
   };
 
   return (
@@ -95,7 +122,11 @@ const Profile = ({ user }) => {
       </div>
 
       {isEdit ? (
-        <ProfileForm profile={profile} onSave={handleSave} />
+        <ProfileForm
+          profile={profile}
+          onSave={handleSave}
+          isLoading={isLoading}
+        />
       ) : (
         <ProfileDetail profile={profile} onEdit={handleEdit} />
       )}

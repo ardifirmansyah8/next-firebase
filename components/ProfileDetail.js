@@ -6,6 +6,8 @@ import {
   Icon,
   Header
 } from "semantic-ui-react";
+import format from "date-fns/format";
+import fromUnixTime from "date-fns/fromUnixTime";
 
 const ProfileDetail = ({ profile, onEdit }) => {
   return (
@@ -63,8 +65,17 @@ const ProfileDetail = ({ profile, onEdit }) => {
                               ({data.title})
                             </span>
                             <Header.Subheader>
-                              {data.startDate} -{" "}
-                              {data.recent ? "PRESENT" : data.endDate}
+                              {format(
+                                fromUnixTime(data.startDate.seconds),
+                                "yyyy-MM-dd"
+                              )}{" "}
+                              -{" "}
+                              {data.recent
+                                ? "PRESENT"
+                                : format(
+                                    fromUnixTime(data.endDate.seconds),
+                                    "yyyy-MM-dd"
+                                  )}
                             </Header.Subheader>
                           </Header.Content>
                         </Header>
