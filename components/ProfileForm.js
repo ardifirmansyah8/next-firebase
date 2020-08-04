@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import {
   Container,
   Grid,
@@ -13,12 +14,18 @@ import fromUnixTime from "date-fns/fromUnixTime";
 
 import {
   InputField,
+  PhotoField,
   DateField,
   CheckboxField,
   TextAreaField
 } from "../components/Form";
 
 const ProfileForm = ({ handleSubmit, values, isLoading }) => {
+  const photoRef = useRef();
+  const logoRef = useRef([]);
+  const imgPlaceholder =
+    "https://react.semantic-ui.com/images/wireframe/image.png";
+
   return (
     <Container style={{ margin: "100px 0" }}>
       <Form onSubmit={() => handleSubmit()}>
@@ -26,10 +33,12 @@ const ProfileForm = ({ handleSubmit, values, isLoading }) => {
           <Grid.Row>
             <Grid.Column width={3}>
               <Image
-                src="https://react.semantic-ui.com/images/wireframe/image.png"
+                src={values.photo ? values.photo : imgPlaceholder}
                 size="small"
                 rounded
+                onClick={() => photoRef.current.click()}
               />
+              <Field photoRef={photoRef} name="photo" component={PhotoField} />
             </Grid.Column>
             <Grid.Column width={13}>
               <Field
@@ -77,6 +86,7 @@ const ProfileForm = ({ handleSubmit, values, isLoading }) => {
                           arrayHelpers.push({
                             title: "",
                             company: "",
+                            logo: null,
                             recent: false,
                             startDate: "",
                             endDate: "",
@@ -94,9 +104,19 @@ const ProfileForm = ({ handleSubmit, values, isLoading }) => {
                           <Grid.Row>
                             <Grid.Column width={2}>
                               <Image
-                                src="https://react.semantic-ui.com/images/wireframe/image.png"
                                 size="tiny"
                                 rounded
+                                src={
+                                  experience.logo
+                                    ? experience.logo
+                                    : imgPlaceholder
+                                }
+                                onClick={() => logoRef.current[index].click()}
+                              />
+                              <Field
+                                photoRef={el => (logoRef.current[index] = el)}
+                                name={`experiences.${index}.logo`}
+                                component={PhotoField}
                               />
                             </Grid.Column>
                             <Grid.Column width={13}>
@@ -196,6 +216,7 @@ export default withFormik({
       name: profile.name ? profile.name : "",
       email: profile.email,
       age: profile.age ? profile.age : undefined,
+      photo: profile.photo ? profile.photo : null,
       experiences: experiences
         ? experiences
         : [
@@ -204,6 +225,7 @@ export default withFormik({
               company: "",
               recent: false,
               startDate: "",
+              logo: null,
               endDate: "",
               description: ""
             }

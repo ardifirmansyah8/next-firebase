@@ -22,6 +22,33 @@ export const InputField = ({
   );
 };
 
+export const PhotoField = ({
+  field: { name, value },
+  form: { errors, touched, setFieldValue },
+  photoRef
+}) => {
+  const error = get(errors, name);
+  const touch = get(touched, name);
+
+  return (
+    <input
+      type="file"
+      accept="image/*"
+      hidden
+      ref={photoRef}
+      onChange={event => {
+        const reader = new FileReader();
+
+        reader.onloadend = () => {
+          setFieldValue(name, reader.result);
+        };
+
+        reader.readAsDataURL(event.currentTarget.files[0]);
+      }}
+    />
+  );
+};
+
 export const DateField = ({
   field: { name, value },
   form: { errors, touched, setFieldValue },
@@ -37,7 +64,6 @@ export const DateField = ({
       onChange={(_event, data) => {
         setFieldValue(name, data.value);
       }}
-      {...props}
       className="datefield"
       error={touch && error}
     />
