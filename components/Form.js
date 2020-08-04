@@ -25,37 +25,40 @@ export const InputField = ({
 };
 
 export const PhotoField = ({
-  field: { name, value },
-  form: { errors, touched, setFieldValue },
+  field: { name },
+  form: { errors, setFieldValue },
   photoRef,
   uid
 }) => {
-  // const error = get(errors, name);
-  // const touch = get(touched, name);
+  const error = get(errors, name);
 
   return (
-    <input
-      type="file"
-      accept="image/*"
-      hidden
-      ref={photoRef}
-      onChange={event => {
-        const reader = new FileReader();
-        const photoRef = storage
-          .ref()
-          .child(`${uid}/${event.currentTarget.files[0].name}`);
+    <Form.Field>
+      <input
+        type="file"
+        accept="image/*"
+        hidden
+        ref={photoRef}
+        onChange={event => {
+          const reader = new FileReader();
+          const photoRef = storage
+            .ref()
+            .child(`${uid}/${event.currentTarget.files[0].name}`);
 
-        reader.onloadend = () => {
-          photoRef.putString(reader.result, "data_url").then(async snapshot => {
-            const url = await snapshot.ref.getDownloadURL();
-            console.log(url);
-            setFieldValue(name, url);
-          });
-        };
+          reader.onloadend = () => {
+            photoRef
+              .putString(reader.result, "data_url")
+              .then(async snapshot => {
+                const url = await snapshot.ref.getDownloadURL();
+                setFieldValue(name, url);
+              });
+          };
 
-        reader.readAsDataURL(event.currentTarget.files[0]);
-      }}
-    />
+          reader.readAsDataURL(event.currentTarget.files[0]);
+        }}
+      />
+      {error && <div className="ui pointing above prompt label">{error}</div>}
+    </Form.Field>
   );
 };
 

@@ -121,6 +121,7 @@ const ProfileForm = ({ uid, handleSubmit, values, isLoading }) => {
                                 onClick={() => logoRef.current[index].click()}
                               />
                               <Field
+                                uid={uid}
                                 photoRef={el => (logoRef.current[index] = el)}
                                 name={`experiences.${index}.logo`}
                                 component={PhotoField}
@@ -242,6 +243,7 @@ export default withFormik({
   validationSchema: Yup.object().shape({
     name: Yup.string().required("Please input your name"),
     age: Yup.number().required("Please input your age"),
+    photo: Yup.string().nullable().required("Please upload your photo"),
     email: Yup.string()
       .email("Invalid email")
       .required("Please input your email"),
@@ -249,6 +251,7 @@ export default withFormik({
       Yup.object().shape({
         title: Yup.string().required("Required"),
         company: Yup.string().required("Required"),
+        logo: Yup.string().nullable().required("Required"),
         recent: Yup.boolean(),
         startDate: Yup.string().required("Required"),
         endDate: Yup.string().when("recent", {
