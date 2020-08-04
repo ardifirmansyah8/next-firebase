@@ -20,7 +20,7 @@ import {
   TextAreaField
 } from "../components/Form";
 
-const ProfileForm = ({ handleSubmit, values, isLoading }) => {
+const ProfileForm = ({ uid, handleSubmit, values, isLoading }) => {
   const photoRef = useRef();
   const logoRef = useRef([]);
   const imgPlaceholder =
@@ -36,9 +36,15 @@ const ProfileForm = ({ handleSubmit, values, isLoading }) => {
                 src={values.photo ? values.photo : imgPlaceholder}
                 size="small"
                 rounded
+                style={{ cursor: "pointer" }}
                 onClick={() => photoRef.current.click()}
               />
-              <Field photoRef={photoRef} name="photo" component={PhotoField} />
+              <Field
+                uid={uid}
+                photoRef={photoRef}
+                name="photo"
+                component={PhotoField}
+              />
             </Grid.Column>
             <Grid.Column width={13}>
               <Field
@@ -111,6 +117,7 @@ const ProfileForm = ({ handleSubmit, values, isLoading }) => {
                                     ? experience.logo
                                     : imgPlaceholder
                                 }
+                                style={{ cursor: "pointer" }}
                                 onClick={() => logoRef.current[index].click()}
                               />
                               <Field

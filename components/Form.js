@@ -2,6 +2,8 @@ import { Form, Checkbox, TextArea } from "semantic-ui-react";
 import SemanticDatepicker from "react-semantic-ui-datepickers";
 import get from "lodash/get";
 
+import { storage } from "../firebase/clientApp";
+
 export const InputField = ({
   field: { name, value },
   form: { errors, touched, setFieldValue },
@@ -25,10 +27,11 @@ export const InputField = ({
 export const PhotoField = ({
   field: { name, value },
   form: { errors, touched, setFieldValue },
-  photoRef
+  photoRef,
+  uid
 }) => {
-  const error = get(errors, name);
-  const touch = get(touched, name);
+  // const error = get(errors, name);
+  // const touch = get(touched, name);
 
   return (
     <input
@@ -38,9 +41,16 @@ export const PhotoField = ({
       ref={photoRef}
       onChange={event => {
         const reader = new FileReader();
+        const photoRef = storage
+          .ref()
+          .child(`${uid}/${event.currentTarget.files[0].name}`);
 
         reader.onloadend = () => {
-          setFieldValue(name, reader.result);
+          photoRef.putString(reader.result, "data_url").then(async snapshot => {
+            const url = await snapshot.ref.getDownloadURL();
+            console.log(url);
+            setFieldValue(name, url);
+          });
         };
 
         reader.readAsDataURL(event.currentTarget.files[0]);

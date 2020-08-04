@@ -123,6 +123,7 @@ const Profile = ({ user }) => {
 
       {isEdit ? (
         <ProfileForm
+          uid={user.uid}
           profile={profile}
           onSave={handleSave}
           isLoading={isLoading}

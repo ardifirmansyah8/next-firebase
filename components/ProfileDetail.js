@@ -10,13 +10,16 @@ import format from "date-fns/format";
 import fromUnixTime from "date-fns/fromUnixTime";
 
 const ProfileDetail = ({ profile, onEdit }) => {
+  const imgPlaceholder =
+    "https://react.semantic-ui.com/images/wireframe/image.png";
+
   return (
     <Container style={{ marginTop: 100 }}>
       <Grid>
         <Grid.Row>
           <Grid.Column width={3}>
             <Image
-              src="https://react.semantic-ui.com/images/wireframe/image.png"
+              src={profile.photo ? profile.photo : imgPlaceholder}
               size="small"
               rounded
             />
@@ -51,7 +54,7 @@ const ProfileDetail = ({ profile, onEdit }) => {
                   <Grid.Row>
                     <Grid.Column width={2}>
                       <Image
-                        src="https://react.semantic-ui.com/images/wireframe/image.png"
+                        src={data.logo ? data.logo : imgPlaceholder}
                         size="tiny"
                         rounded
                       />
